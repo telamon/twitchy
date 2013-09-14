@@ -14,7 +14,24 @@ var twitchy = function(opts){
     key: 'placeholder',
     secret: 'placeholder', 
     debug : true,
-    httpPort : 4567
+    httpPort : 4567,
+    scope : [
+      // This list of scopes is just for testing reference
+      // only request the ones you're going to use by passing them through options.
+      'user_read',
+      'user_blocks_edit',
+      'user_blocks_read',      
+      'user_follows_edit',
+      'channel_read',
+      'channel_editor',
+      'channel_commercial',
+      'channel_stream',
+      'channel_subscriptions',
+      'user_subscriptions',
+      'channel_check_subscription',
+      'chat_login'
+
+    ]
   }, opts || {});
   
   var oauth = new OAuth2( 
@@ -40,39 +57,32 @@ var twitchy = function(opts){
         var authUrl = oauth.getAuthorizeUrl({
           redirect_uri: 'http://localhost:'+opts.httpPort,
           response_type : 'code',
-          scope: [
-            'user_read',
-            'user_blocks_edit',
-            'user_blocks_read',
-            'chat_login'
-          ]          
+          scope: opts.scope.join(" ")         
         });
-        res.writeHead(302, {'Location': authUrl,});
+        res.writeHead(302, {'Location': authUrl,});        
         res.end();
+        opts.debug && console.log("Redirected user to: "+authUrl);
       }else if(req.url.match(/^\/\?code=/)){
         // We've got the code
         var code = req.url.match(/^\/\?code=([^&]+)(?:&|$)/)[1];        
         oauth.getOAuthAccessToken(code,{
             'grant_type' : 'authorization_code',
-             scope: [
-              'user_read',
-              'user_blocks_edit',
-              'user_blocks_read',
-              'chat_login'
-             ],
-             redirect_uri: 'http://localhost:'+opts.httpPort,
+             scope: opts.scope.join(" "),
+             redirect_uri: 'http://localhost:'+opts.httpPort,             
           },
           function(err, access_token,refresh_token,result){
             if(!err){
               opts.access_token =access_token;
-              opts.refresh_token =refresh_token;            
+              opts.refresh_token =refresh_token;   
+              console.log("Your Access Token is: "+ acces_token);
+              console.log("save it somewhere safe.");
             }
             callback && callback(err, access_token,refresh_token,result);
           }
           
         );
         res.end("");
-        //authSrv.close();
+        authSrv.close();
       }
     });
     authSrv.listen(opts.httpPort);
