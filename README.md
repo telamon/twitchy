@@ -1,8 +1,8 @@
 # Twitchy
+This is a TwitchTv REST API wrapper for node. 
 
 ### Installation
 
-This is a TwitchTv REST API wrapper for node. 
 
 Add the following to your `dependencies` hash in `package.json`
 
