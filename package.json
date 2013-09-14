@@ -4,7 +4,7 @@
   "description": "TwitchTV API library",
   "main": "twitchy.js",
   "scripts": {
-    "test": "mocha --reporter spec",
+    "test": "mocha --reporter spec --timeout 60000",
     "debug" : "mocha debug --reporter spec --timeout 60000"
   },
   "repository": {
@@ -23,7 +23,9 @@
   },
   "dependencies": {
     "oauth":"0.9.x",
-    "underscore" : "1.5.2"
+    "underscore" : "1.5.2",
+    "superagent" : "0.15.4",
+    "superagent-oauth" : "0.2.3"
   },
   "devDependencies": {
     "mocha" : "*",
