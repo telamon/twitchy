@@ -1,0 +1,30 @@
+{
+  "name": "twitchy",
+  "version": "0.0.1",
+  "description": "TwitchTV API library",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/telamon/twitchy.git"
+  },
+  "keywords": [
+    "twitch",
+    "twitchtv",
+    "oauth2"
+  ],
+  "author": "Tony Ivanov (telamohn@gmail.com)",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/telamon/twitchy/issues"
+  },
+  "dependencies": {
+    "oauth":"0.9.x"	
+  },
+  "devDependencies": {
+    "mocha" : "*",
+    "shoulda" : "*"
+  }
+}
