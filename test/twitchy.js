@@ -7,7 +7,16 @@ describe('TwitchTV Library', function(){
 		should.exist(Twitchy);
 	});
 	it('should be possible to initialize',function(){
-		client = new Twitchy();
+		var client = new Twitchy();
 		should.exist(client);
 	});
+  describe('OAuth2 service',function(done){
+  it('should be possible to authenticate', function(done){
+    var client  = new Twitchy().auth(function(err,access_token,refresh_token,results){
+      should.not.exist(err);
+      done();
+    });
+  });
+
+  });
 });
