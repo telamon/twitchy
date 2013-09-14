@@ -2,9 +2,9 @@
   "name": "twitchy",
   "version": "0.0.1",
   "description": "TwitchTV API library",
-  "main": "index.js",
+  "main": "twitchy.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -21,10 +21,11 @@
     "url": "https://github.com/telamon/twitchy/issues"
   },
   "dependencies": {
-    "oauth":"0.9.x"	
+    "oauth":"0.9.x",
+    "underscore" : "1.5.2"
   },
   "devDependencies": {
     "mocha" : "*",
-    "shoulda" : "*"
+    "should" : "*"
   }
 }
