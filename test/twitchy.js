@@ -17,20 +17,43 @@ describe('TwitchTV Library', function(){
       should.exist(credentials.key);
       should.exist(credentials.secret);
       var client  = new Twitchy(credentials).auth(function(err,access_token, refresh_token,result){
-        console.log("AccessToken: "+access_token);
+        //console.log("AccessToken: "+access_token);
         should.not.exist(err);
         should.exist(access_token);
         done();
       });
     });
+
     it('should be possible to fetch a restricted resource',function(done){
       var client  = new Twitchy(credentials).auth();
       client.getChannel("numrii",function(err,res){
         should.not.exist(err);
-        console.log(res);
+        //console.log(res);
         done();
       });
     });
   });
 
+  describe('REST API',function(){
+
+    it('getBlocks',function(done){      
+      new Twitchy(credentials).auth().getBlocks("telamohn",done);
+    });
+    it('blockUser',function(done){
+      new Twitchy(credentials).auth().blockUser("telamohn","numrii",done);
+    });
+    it('unblockUser',function(done){
+      new Twitchy(credentials).auth().unblockUser("telamohn","numrii",done);
+    });
+
+
+
+    it('getChannel',function(done){
+      new Twitchy(credentials).auth().getChannel("numrii",done);
+    });
+
+
+    
+
+  });
 });

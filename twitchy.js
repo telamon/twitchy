@@ -3,7 +3,8 @@ var OAuth = require('oauth'),
   _ = require('underscore'),
   http = require('http'),
   url = require('url'),
-  request = require('superagent');
+  request = require('superagent'),
+  assert = require('assert');
 
 require('superagent-oauth')(request);
    
@@ -80,16 +81,47 @@ var twitchy = function(opts){
   }
 
   _get = function(url){
-    return request(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
   };
-  /////////////
-  /// API Calls
-  /////////////
+  _put = function(url){
+    return request.put(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+  };  
+  _delete = function(url){
+    return request.del(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+  };   
+
+
+  //////////////////////
+  /// API Calls 
+  /// Reference: https://github.com/justintv/Twitch-API
+  //////////////////////
+
+  this.getBlocks=function(login,cb){
+    _get("users/"+login+"/blocks").end(function(err,res){      
+      assert.equal(res.status, 200, JSON.stringify(res.body));
+      cb && cb(err, res.body)
+    });
+  };
+
+  this.blockUser=function(user,target,cb){
+    _put("users/"+user+"/blocks/"+target).end(function(err,res){
+      assert.equal(res.status, 200, JSON.stringify(res.body));
+      cb && cb(err, res.body);
+    });
+  };
+  this.unblockUser=function(user,target,cb){
+    _delete("users/"+user+"/blocks/"+target).end(function(err,res){
+      assert.equal(res.status, 200, JSON.stringify(res.body));
+      cb && cb(err, res.body);
+    });
+  };
 
   this.getChannel=function(name,cb){
-    _get("channels/"+name).end(function(err,res){cb && cb(err, res.body)});
+    _get("channels/"+name).end(function(err,res){
+      assert.equal(res.status, 200, JSON.stringify(res.body));
+      cb && cb(err, res.body);
+    });
   };
-
 
 
 };
