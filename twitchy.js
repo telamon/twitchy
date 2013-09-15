@@ -50,8 +50,10 @@ var twitchy = function(opts){
       callback && callback(null,opts.access_token);
       return this;
     }
+
     // Start a temporary webserver
-    var authSrv = http.createServer(function(req,res){       
+    authSrv = http.createServer(function(req,res){   
+      opts.debug && console.log("REQUEST: "+ req.url);    
       if(req.url.match(/^\/$/)){
         // No code present, Redirect user to authentication url.
         var authUrl = oauth.getAuthorizeUrl({
@@ -74,18 +76,26 @@ var twitchy = function(opts){
             if(!err){
               opts.access_token =access_token;
               opts.refresh_token =refresh_token;   
-              console.log("Your Access Token is: "+ acces_token);
+              console.log("Your Access Token is: "+ access_token);
               console.log("save it somewhere safe.");
+              res.writeHead(200 ,{
+                //'Content-Disposition':'attachment; filename=credentials.json',
+                'ContentType':'application/json'                
+              });
+              res.end(JSON.stringify(opts));              
+            }else{
+              res.writeHead(500);
+              res.end(err);
             }
+            authSrv.close();
             callback && callback(err, access_token,refresh_token,result);
           }
           
         );
-        res.end("");
-        authSrv.close();
+        
       }
-    });
-    authSrv.listen(opts.httpPort);
+    });    
+    authSrv.listen(opts.httpPort);    
     console.log("Now open your browser and point it to: http://localhost:4567");
     return this;
   }
@@ -105,32 +115,35 @@ var twitchy = function(opts){
   /// API Calls 
   /// Reference: https://github.com/justintv/Twitch-API
   //////////////////////
+  var _assertingCallback = function(expectedStatus,cb){    
+    return function(err,res){
+      try{
+        assert.equal(err,null);
+      }catch(e){cb && cb(e);}
+
+      try{
+        assert.equal(res.status, expectedStatus, JSON.stringify(res.body))
+        cb && cb(err, res.body);
+      }catch(e){ 
+        e.status = "Got " + res.status +" expected "+ expectedStatus;
+        cb && cb(e);
+      }
+    }
+  };
 
   this.getBlocks=function(login,cb){
-    _get("users/"+login+"/blocks").end(function(err,res){      
-      assert.equal(res.status, 200, JSON.stringify(res.body));
-      cb && cb(err, res.body)
-    });
+    _get("users/"+login+"/blocks").end(_assertingCallback(200,cb));
   };
 
   this.blockUser=function(user,target,cb){
-    _put("users/"+user+"/blocks/"+target).end(function(err,res){
-      assert.equal(res.status, 200, JSON.stringify(res.body));
-      cb && cb(err, res.body);
-    });
+    _put("users/"+user+"/blocks/"+target).end(_assertingCallback(200,cb));
   };
   this.unblockUser=function(user,target,cb){
-    _delete("users/"+user+"/blocks/"+target).end(function(err,res){
-      assert.equal(res.status, 200, JSON.stringify(res.body));
-      cb && cb(err, res.body);
-    });
+    _delete("users/"+user+"/blocks/"+target).end(_assertingCallback(200,cb));
   };
 
   this.getChannel=function(name,cb){
-    _get("channels/"+name).end(function(err,res){
-      assert.equal(res.status, 200, JSON.stringify(res.body));
-      cb && cb(err, res.body);
-    });
+    _get("channels/"+name).end(_assertingCallback(200,cb));
   };
 
 
