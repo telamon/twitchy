@@ -101,13 +101,16 @@ var twitchy = function(opts){
   }
 
   _get = function(url){
-    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
+    .set("Authorization","OAuth "+opts.access_token);
   };
   _put = function(url){
-    return request.put(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+    return request.put(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
+    .set("Authorization","OAuth "+opts.access_token);
   };  
   _delete = function(url){
-    return request.del(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret);
+    return request.del(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
+    .set("Authorization","OAuth "+opts.access_token);
   };   
 
 
@@ -122,7 +125,7 @@ var twitchy = function(opts){
       }catch(e){cb && cb(e);}
 
       try{
-        assert.equal(res.status, expectedStatus, JSON.stringify(res.body))
+        assert.equal(res.status, expectedStatus, res.body ? JSON.stringify(res.body) : res.status);
         cb && cb(err, res.body);
       }catch(e){ 
         e.status = "Got " + res.status +" expected "+ expectedStatus;
@@ -146,6 +149,25 @@ var twitchy = function(opts){
     _get("channels/"+name).end(_assertingCallback(200,cb));
   };
 
+  this.getFollowersOf=function(channel,cb){
+    _get("channels/"+channel+"/follows").end(_assertingCallback(200,cb));
+  };
+  this.getFollowedChannels=function(user,cb){
+    _get("users/"+user+"/follows/channels").end(_assertingCallback(200,cb));
+  };
+  this.followChannel=function(user,channel,cb){
+    _put("users/"+user+"/follows/channels/"+channel).end(_assertingCallback(200,cb));
+  };
+  this.unfollowChannel=function(user,channel,cb){
+    _delete("users/"+user+"/follows/channels/"+channel).end(_assertingCallback(200,cb));
+  };
+/*
+GET /channels/:channel/follows  Get channel's list of following users
+GET /users/:user/follows/channels Get a user's list of followed channels
+GET /users/:user/follows/channels/:target Get status of follow relationship between user and target channel
+PUT /users/:user/follows/channels/:target Follow a channel
+DELETE /users/:user/follows/channels/:target
+*/
 
 };
 module.exports= twitchy;
