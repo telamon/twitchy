@@ -43,10 +43,20 @@ describe('TwitchTV Library', function(){
         new Twitchy(credentials).auth().getBlocks("telamohn",done);
       });
       it('blockUser',function(done){
-        new Twitchy(credentials).auth().blockUser("telamohn","numrii",done);
+        new Twitchy(credentials).auth().blockUser("telamohn","numrii",function(err,res){
+          should.exist(res._id);
+          done();
+        });
       });
       it('unblockUser',function(done){
-        new Twitchy(credentials).auth().unblockUser("telamohn","numrii",done);
+        new Twitchy(credentials).auth().unblockUser("telamohn","numrii",function(err,res){          
+          if(err.statusCode === 404){ // Move this assertions to the library maybe?
+            should.equal(JSON.parse(err.data).message,'Block does not exist');
+          }else{
+            err.should.have.property('statusCode',204);
+          }
+          done();
+        });
       });
     });
 

@@ -40,7 +40,8 @@ var twitchy = function(opts){
     'oauth2/token',
     { 'Accept' : 'application/vnd.twitchtv.v2+json'}
   );
-
+  oauth.setAuthMethod('OAuth');
+  oauth.setAccessTokenName('oauth_token');
 
   // Auth function
   this.auth = function(callback){
@@ -101,16 +102,15 @@ var twitchy = function(opts){
   }
 
   _get = function(url){
-    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
-    .set("Authorization","OAuth "+opts.access_token);
+    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token);
   };
-  _put = function(url){
-    return request.put(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
-    .set("Authorization","OAuth "+opts.access_token);
+  _put = function(path,cb){
+    return oauth._request("PUT",opts.baseUrl+path,{},null,opts.access_token,cb);
+    //return request.put(opts.baseUrl+url).sign(oauth, opts.access_token);
   };  
-  _delete = function(url){
-    return request.del(opts.baseUrl+url).sign(oauth, opts.access_token, opts.secret)
-    .set("Authorization","OAuth "+opts.access_token);
+  _delete = function(path,cb){
+    return oauth._request("DELETE",opts.baseUrl+path,{},null,opts.access_token,cb);
+    //return request.del(opts.baseUrl+url).sign(oauth, opts.access_token);
   };   
 
 
@@ -133,16 +133,20 @@ var twitchy = function(opts){
       }
     }
   };
-
+  var _parsingCallback=function(cb){
+    return function(err,res){
+      cb && cb(err, (typeof res === 'string')? JSON.parse(res):res);
+    };
+  };
   this.getBlocks=function(login,cb){
     _get("users/"+login+"/blocks").end(_assertingCallback(200,cb));
   };
 
-  this.blockUser=function(user,target,cb){
-    _put("users/"+user+"/blocks/"+target).end(_assertingCallback(200,cb));
+  this.blockUser=function(user,target,cb){    
+    _put("users/"+user+"/blocks/"+target,_parsingCallback(cb));
   };
   this.unblockUser=function(user,target,cb){
-    _delete("users/"+user+"/blocks/"+target).end(_assertingCallback(200,cb));
+    _delete("users/"+user+"/blocks/"+target, _parsingCallback(cb));
   };
 
   this.getChannel=function(name,cb){
@@ -156,18 +160,11 @@ var twitchy = function(opts){
     _get("users/"+user+"/follows/channels").end(_assertingCallback(200,cb));
   };
   this.followChannel=function(user,channel,cb){
-    _put("users/"+user+"/follows/channels/"+channel).end(_assertingCallback(200,cb));
+    _put("users/"+user+"/follows/channels/"+channel,_parsingCallback(cb));
   };
   this.unfollowChannel=function(user,channel,cb){
-    _delete("users/"+user+"/follows/channels/"+channel).end(_assertingCallback(200,cb));
+    _delete("users/"+user+"/follows/channels/"+channel,_parsingCallback(cb));
   };
-/*
-GET /channels/:channel/follows  Get channel's list of following users
-GET /users/:user/follows/channels Get a user's list of followed channels
-GET /users/:user/follows/channels/:target Get status of follow relationship between user and target channel
-PUT /users/:user/follows/channels/:target Follow a channel
-DELETE /users/:user/follows/channels/:target
-*/
 
 };
 module.exports= twitchy;
