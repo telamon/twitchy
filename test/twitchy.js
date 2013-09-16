@@ -31,10 +31,17 @@ describe('TwitchTV Library', function(){
         should.exist(json.blocks);
         done(err);
       });
-      
-
-
     });
+    it('getRoot() should return current authentication info',function(done){
+      new Twitchy(credentials).auth()
+      .getRoot(function(err,res){
+        should.exist(res);
+        should.exist(res.token);
+        should.exist(res.token.user_name);
+        should.exist(res._links);
+        done(err);
+      });
+    });     
   });
 
   describe('REST API',function(){
@@ -82,14 +89,21 @@ describe('TwitchTV Library', function(){
       });      
 
       it('unfollowChannel',function(done){
-        new Twitchy(credentials).auth().unfollowChannel("telamohn","numrii",function(err,res){
-          console.log(res);
-          done(err);
+        new Twitchy(credentials).auth().unfollowChannel("telamohn","numrii",function(err,res){          
+          if(err){
+            if(err.statusCode === 404){
+              var data = JSON.parse(err.data);
+              data.message.should.match(/is not following/);
+            }else{
+              err.should.have.property('statusCode',204);  
+            }
+          }
+          done();
         });
       });  
       it('followChannel',function(done){
         new Twitchy(credentials).auth().followChannel("telamohn","numrii",function(err,res){
-          console.log(res);
+          //console.log(res);
           done(err);
         });
       });  

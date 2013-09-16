@@ -138,6 +138,10 @@ var twitchy = function(opts){
       cb && cb(err, (typeof res === 'string')? JSON.parse(res):res);
     };
   };
+
+  this.getRoot = function(cb){
+    _get("/").end(_assertingCallback(200,cb));
+  };
   this.getBlocks=function(login,cb){
     _get("users/"+login+"/blocks").end(_assertingCallback(200,cb));
   };
