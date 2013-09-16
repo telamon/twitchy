@@ -101,18 +101,21 @@ var twitchy = function(opts){
     return this;
   }
 
-  _get = function(url){
-    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token);
+  this._get=_get = function(url,cb){
+    return request.get(opts.baseUrl+url).sign(oauth, opts.access_token).end(cb);
   };
-  _put = function(path,cb){
+  this._put=_put = function(path,cb){
     return oauth._request("PUT",opts.baseUrl+path,{},null,opts.access_token,cb);
     //return request.put(opts.baseUrl+url).sign(oauth, opts.access_token);
   };  
-  _delete = function(path,cb){
+  this._delete=_delete = function(path,cb){
     return oauth._request("DELETE",opts.baseUrl+path,{},null,opts.access_token,cb);
     //return request.del(opts.baseUrl+url).sign(oauth, opts.access_token);
   };   
 
+  this._post = _post = function(path,postdata,cb){
+    return oauth._request("POST",opts.baseUrl+path,{},postdata||{},opts.access_token,cb);
+  };
 
   //////////////////////
   /// API Calls 
@@ -140,10 +143,10 @@ var twitchy = function(opts){
   };
 
   this.getRoot = function(cb){
-    _get("/").end(_assertingCallback(200,cb));
+    _get("/",_assertingCallback(200,cb));
   };
   this.getBlocks=function(login,cb){
-    _get("users/"+login+"/blocks").end(_assertingCallback(200,cb));
+    _get("users/"+login+"/blocks",_assertingCallback(200,cb));
   };
 
   this.blockUser=function(user,target,cb){    
@@ -154,14 +157,14 @@ var twitchy = function(opts){
   };
 
   this.getChannel=function(name,cb){
-    _get("channels/"+name).end(_assertingCallback(200,cb));
+    _get("channels/"+name,_assertingCallback(200,cb));
   };
 
   this.getFollowersOf=function(channel,cb){
-    _get("channels/"+channel+"/follows").end(_assertingCallback(200,cb));
+    _get("channels/"+channel+"/follows",_assertingCallback(200,cb));
   };
   this.getFollowedChannels=function(user,cb){
-    _get("users/"+user+"/follows/channels").end(_assertingCallback(200,cb));
+    _get("users/"+user+"/follows/channels",_assertingCallback(200,cb));
   };
   this.followChannel=function(user,channel,cb){
     _put("users/"+user+"/follows/channels/"+channel,_parsingCallback(cb));

@@ -1,6 +1,6 @@
 {
   "name": "twitchy",
-  "version": "0.0.1",
+  "version": "0.5.0",
   "description": "TwitchTV API library",
   "main": "twitchy.js",
   "scripts": {
