@@ -1,7 +1,7 @@
 {
-  "name": "twitchy",
-  "version": "0.5.0",
-  "description": "TwitchTV API library",
+  "name": "twitchy-nonblocking",
+  "version": "0.5.1",
+  "description": "TwitchTV API library without hogging your port",
   "main": "twitchy.js",
   "scripts": {
     "test": "mocha --reporter spec --timeout 60000",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/telamon/twitchy.git"
+    "url": "https://github.com/dsalsman-rdi/twitchy.git"
   },
   "keywords": [
     "twitch",
     "twitchtv",
     "oauth2"
   ],
-  "author": "Tony Ivanov (telamohn@gmail.com)",
+  "author": "Dillon Salsman Pressley (dillon.salsman@gmail.com)",
   "license": "BSD",
   "bugs": {
     "url": "https://github.com/telamon/twitchy/issues"

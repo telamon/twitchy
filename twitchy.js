@@ -43,6 +43,50 @@ var twitchy = function(opts){
   oauth.setAuthMethod('OAuth');
   oauth.setAccessTokenName('oauth_token');
 
+  var authSrv = http.createServer(function(req,res){   
+    opts.debug && console.log("REQUEST: "+ req.url);    
+    if(req.url.match(/^\/$/)){
+      // No code present, Redirect user to authentication url.
+      var authUrl = oauth.getAuthorizeUrl({
+        redirect_uri: 'http://localhost:'+opts.httpPort,
+        response_type : 'code',
+        scope: opts.scope.join(" ")         
+      });
+      res.writeHead(302, {'Location': authUrl,});        
+      res.end();
+      opts.debug && console.log("Redirected user to: "+authUrl);
+    }else if(req.url.match(/^\/\?code=/)){
+      // We've got the code
+      var code = req.url.match(/^\/\?code=([^&]+)(?:&|$)/)[1];        
+      oauth.getOAuthAccessToken(code,{
+          'grant_type' : 'authorization_code',
+           scope: opts.scope.join(" "),
+           redirect_uri: 'http://localhost:'+opts.httpPort,             
+        },
+        function(err, access_token,refresh_token,result){
+          if(!err){
+            opts.access_token =access_token;
+            opts.refresh_token =refresh_token;   
+            console.log("Your Access Token is: "+ access_token);
+            console.log("save it somewhere safe.");
+            res.writeHead(200 ,{
+              //'Content-Disposition':'attachment; filename=credentials.json',
+              'ContentType':'application/json'                
+            });
+            res.end(JSON.stringify(opts));              
+          }else{
+            res.writeHead(500);
+            res.end(err);
+          }
+          authSrv.close();
+          callback && callback(err, access_token,refresh_token,result);
+        }
+        
+      );
+      
+    }
+  });
+
   // Auth function
   this.auth = function(callback){
 
@@ -53,53 +97,15 @@ var twitchy = function(opts){
     }
 
     // Start a temporary webserver
-    authSrv = http.createServer(function(req,res){   
-      opts.debug && console.log("REQUEST: "+ req.url);    
-      if(req.url.match(/^\/$/)){
-        // No code present, Redirect user to authentication url.
-        var authUrl = oauth.getAuthorizeUrl({
-          redirect_uri: 'http://localhost:'+opts.httpPort,
-          response_type : 'code',
-          scope: opts.scope.join(" ")         
-        });
-        res.writeHead(302, {'Location': authUrl,});        
-        res.end();
-        opts.debug && console.log("Redirected user to: "+authUrl);
-      }else if(req.url.match(/^\/\?code=/)){
-        // We've got the code
-        var code = req.url.match(/^\/\?code=([^&]+)(?:&|$)/)[1];        
-        oauth.getOAuthAccessToken(code,{
-            'grant_type' : 'authorization_code',
-             scope: opts.scope.join(" "),
-             redirect_uri: 'http://localhost:'+opts.httpPort,             
-          },
-          function(err, access_token,refresh_token,result){
-            if(!err){
-              opts.access_token =access_token;
-              opts.refresh_token =refresh_token;   
-              console.log("Your Access Token is: "+ access_token);
-              console.log("save it somewhere safe.");
-              res.writeHead(200 ,{
-                //'Content-Disposition':'attachment; filename=credentials.json',
-                'ContentType':'application/json'                
-              });
-              res.end(JSON.stringify(opts));              
-            }else{
-              res.writeHead(500);
-              res.end(err);
-            }
-            authSrv.close();
-            callback && callback(err, access_token,refresh_token,result);
-          }
-          
-        );
-        
-      }
-    });    
-    authSrv.listen(opts.httpPort);    
+    
+    authSrv.listen(opts.httpPort);  
     console.log("Now open your browser and point it to: http://localhost:4567");
     return this;
   }
+
+  this._close = function() {
+    authSrv.close();
+  } 
 
   this._get=_get = function(url,cb){
     return request.get(opts.baseUrl+url).sign(oauth, opts.access_token).end(cb);
